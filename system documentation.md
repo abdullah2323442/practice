@@ -84,11 +84,10 @@ graph LR
 graph LR
     Admin((Admin))
     
-    Admin --> UC1[Manage Users]
-    Admin --> UC2[Manage Forum Posts]
-    Admin --> UC3[Manage Comments]
-    Admin --> UC4[Manage Encyclopedia]
-    Admin --> UC5[View Dashboard]
+    Admin --> UC1[Manage Forum Posts]
+    Admin --> UC2[Manage Comments]
+    Admin --> UC3[Manage Encyclopedia]
+    Admin --> UC4[View Dashboard]
     
     style Admin fill:#ffd3b6
 ```
@@ -150,7 +149,7 @@ graph LR
     P5 -->|Answers| User
     
     Admin -->|Management Actions| P6
-    P6 -->|CRUD Operations| DS1
+    P6 -->|Read Statistics| DS1
     P6 -->|CRUD Operations| DS2
     P6 -->|CRUD Operations| DS3
     P6 -->|CRUD Operations| DS4
@@ -391,28 +390,36 @@ erDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    participant Web as Web Interface
-    participant Auth as Authentication System
+    participant Web as User Interface
+    participant Auth as Security System
     participant DB as Database
     
     Note over User,DB: Registration Process
     User->>Web: Enter registration details
-    Web->>Auth: Submit registration form
-    Auth->>Auth: Validate input data
-    Auth->>Auth: Hash password
-    Auth->>DB: Store user data
+    Web->>Auth: Submit registration data
+    Auth->>Auth: Validate information
+    Auth->>Auth: Securely encrypt password
+    Auth->>DB: Create user account
     DB-->>Auth: Confirmation
     Auth-->>Web: Registration successful
     Web-->>User: Show success message
     
     Note over User,DB: Login Process
     User->>Web: Enter credentials
-    Web->>Auth: Submit login form
-    Auth->>DB: Verify credentials
-    DB-->>Auth: User data
-    Auth->>Auth: Create session
-    Auth-->>Web: Authentication token
-    Web-->>User: Redirect to dashboard
+    Web->>Auth: Submit login request
+    Auth->>DB: Retrieve user account
+    DB-->>Auth: User details
+    Auth->>Auth: Verify credentials
+    
+    alt Credentials Valid
+        Auth->>Auth: Generate Access Session
+        Auth->>DB: Log login activity
+        Auth-->>Web: Grant Access
+        Web-->>User: Redirect to Dashboard
+    else Invalid Credentials
+        Auth-->>Web: Access Denied
+        Web-->>User: Show error message
+    end
 ```
 
 ### 2. Plant Disease Detection
@@ -420,29 +427,34 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    participant Web as Web Interface
-    participant Scanner as Disease Scanner
+    participant Web as User Interface
+    participant Scanner as Diagnostic System
     participant AI as AI Model
+    participant Encyc as Knowledge Base
     participant DB as Database
-    participant Storage as File Storage
     
     User->>Web: Upload plant image
-    Web->>Scanner: Send image for analysis
-    Scanner->>Storage: Save image
-    Storage-->>Scanner: Image path
+    Web->>Scanner: Submit image for analysis
     
-    Scanner->>AI: Request disease prediction
-    AI->>AI: Analyze image
-    AI-->>Scanner: Disease prediction + confidence
+    Scanner->>Scanner: Prepare image for AI
+    Scanner->>AI: Request disease diagnosis
+    AI->>AI: Analyze visual patterns
+    AI-->>Scanner: Prediction result & certainty
     
-    Scanner->>Scanner: Generate recommendations
-    Scanner->>DB: Save scan results
-    DB-->>Scanner: Confirmation
+    alt High Certainty
+        Scanner->>Encyc: Retrieve disease information
+        Encyc-->>Scanner: Symptoms & Treatment details
+        Scanner->>Scanner: Compile final report
+        Scanner->>DB: Record scan history
+        DB-->>Scanner: Saved
+        Scanner-->>Web: Present diagnosis report
+        Web-->>User: View results & recommendations
+    else Low Certainty
+        Scanner-->>Web: Return "Unclear Result"
+        Web-->>User: Suggest retaking photo
+    end
     
-    Scanner-->>Web: Return diagnosis
-    Web-->>User: Display results
-    
-    Note over User,Storage: User can view history anytime
+    Note over User,DB: User can access this report later
 ```
 
 ### 3. Creating Forum Post with AI Reply
@@ -517,10 +529,9 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    participant Web as Web Interface
+    participant Web as User Interface
     participant Chatbot as Chatbot System
-    participant AI as Hugging Face API
-    participant KB as Knowledge Base
+    participant AI as AI Service
     
     User->>Web: Ask question about plant care
     Web->>Chatbot: Send user message
@@ -528,48 +539,42 @@ sequenceDiagram
     Chatbot->>Chatbot: Analyze question intent
     
     alt Question is plant disease related
-        Chatbot->>KB: Search disease database
-        KB-->>Chatbot: Relevant information
-        Chatbot->>AI: Request AI enhancement
-        AI-->>Chatbot: Enhanced response
+        Chatbot->>Chatbot: Search internal knowledge base
+        Chatbot-->>Web: Return predefined treatment/prevention info
     else General plant care question
         Chatbot->>AI: Request AI response
         AI-->>Chatbot: AI-generated answer
+        Chatbot-->>Web: Return AI response
     else Greeting or casual chat
         Chatbot->>Chatbot: Use predefined responses
+        Chatbot-->>Web: Return response
     end
     
-    Chatbot-->>Web: Return answer
     Web-->>User: Display response
 ```
-
-### 6. Encyclopedia Search and View
-
 ```mermaid
 sequenceDiagram
     actor User
-    participant Web as Web Interface
-    participant Encyclopedia as Encyclopedia System
+    participant Web as User Interface
+    participant System as System Backend
     participant DB as Database
     
-    User->>Web: Search for disease
-    Web->>Encyclopedia: Submit search query
-    Encyclopedia->>DB: Query disease database
-    DB-->>Encyclopedia: Matching results
-    Encyclopedia-->>Web: Search results
-    Web-->>User: Display disease list
+    User->>Web: Navigate to Scan History
+    Web->>System: Request past scans
+    System->>DB: Fetch user's scan records
+    DB-->>System: List of previous diagnoses
+    System-->>Web: Return history data
+    Web-->>User: Display history list
     
-    User->>Web: Click on disease
-    Web->>Encyclopedia: Request disease details
-    Encyclopedia->>DB: Fetch full information
-    DB-->>Encyclopedia: Disease data
-    Encyclopedia-->>Web: Complete details
-    Web-->>User: Show disease page
-    
-    Note over User,DB: Includes symptoms, treatment, prevention
+    User->>Web: Select specific scan
+    Web->>System: Request scan details
+    System->>DB: Fetch full report & image
+    DB-->>System: Detailed record
+    System-->>Web: Return details
+    Web-->>User: Show diagnosis & recommendations
 ```
 
-### 7. Admin - Manage Forum Posts
+### 8. Admin - Manage Forum Posts
 
 ```mermaid
 sequenceDiagram
@@ -599,13 +604,13 @@ sequenceDiagram
     Web->>Forum: Delete post request
     Forum->>Notif: Delete related notifications
     Notif->>DB: Remove notifications
-    Forum->>DB: Soft delete post
+    Forum->>DB: Mark post as deleted
     DB-->>Forum: Confirmation
     Forum-->>Web: Success message
     Web-->>Admin: Post removed from list
 ```
 
-### 8. Admin - Manage Encyclopedia
+### 9. Admin - Manage Encyclopedia
 
 ```mermaid
 sequenceDiagram
