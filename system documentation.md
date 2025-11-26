@@ -168,6 +168,8 @@ erDiagram
     USER ||--o{ FORUM_REPLY : creates
     USER ||--o{ NOTIFICATION : receives
     USER ||--o{ FORUM_LOVE : gives
+    USER ||--o{ SESSION : has
+    USER ||--o{ PASSWORD_RESET_TOKEN : requests
     
     FORUM_POST ||--o{ FORUM_REPLY : has
     FORUM_POST ||--o{ FORUM_POST_IMAGE : contains
@@ -182,20 +184,26 @@ erDiagram
     USER {
         int id PK
         string name
-        string email
-        string password
+        string email UK
         boolean is_admin
+        string password
+        timestamp email_verified_at
+        string remember_token
         timestamp created_at
+        timestamp updated_at
     }
     
     SCAN {
         int id PK
         int user_id FK
         string image_path
-        string disease_name
-        float confidence
-        text recommendations
+        enum status
+        boolean is_healthy
+        decimal is_healthy_probability
+        json diagnosis
+        text error_message
         timestamp created_at
+        timestamp updated_at
     }
     
     FORUM_POST {
@@ -205,11 +213,17 @@ erDiagram
         text description
         string crop_type
         string disease_name
-        string status
+        text symptoms
+        string location
+        enum status
+        boolean is_pinned
         int views_count
         int replies_count
         int loves_count
+        timestamp last_activity_at
         timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
     }
     
     FORUM_REPLY {
@@ -219,21 +233,30 @@ erDiagram
         int parent_id FK
         text content
         boolean is_solution
+        int loves_count
         timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
     }
     
     FORUM_POST_IMAGE {
         int id PK
         int forum_post_id FK
         string image_path
+        string caption
         int order
+        timestamp created_at
+        timestamp updated_at
     }
     
     FORUM_REPLY_IMAGE {
         int id PK
         int forum_reply_id FK
         string image_path
+        string caption
         int order
+        timestamp created_at
+        timestamp updated_at
     }
     
     FORUM_LOVE {
@@ -242,18 +265,26 @@ erDiagram
         int loveable_id
         string loveable_type
         timestamp created_at
+        timestamp updated_at
     }
     
     DISEASE_ENCYCLOPEDIA {
         int id PK
         string name
+        string slug UK
         string plant_type
+        string disease_type
+        string severity
         text description
-        text symptoms
-        text treatment
-        text prevention
+        json symptoms
+        json treatment
+        json prevention
+        string common_season
+        string favorable_conditions
         string image_url
         boolean is_healthy
+        timestamp created_at
+        timestamp updated_at
     }
     
     NOTIFICATION {
@@ -263,8 +294,84 @@ erDiagram
         string title
         text message
         string link
+        json data
         timestamp read_at
         timestamp created_at
+        timestamp updated_at
+    }
+    
+    SESSION {
+        string id PK
+        int user_id FK
+        string ip_address
+        text user_agent
+        text payload
+        int last_activity
+    }
+    
+    PASSWORD_RESET_TOKEN {
+        string email PK
+        string token
+        timestamp created_at
+    }
+
+    CACHE {
+        string key PK
+        mediumText value
+        int expiration
+    }
+
+    CACHE_LOCKS {
+        string key PK
+        string owner
+        int expiration
+    }
+
+    JOBS {
+        int id PK
+        string queue
+        longText payload
+        tinyint attempts
+        int reserved_at
+        int available_at
+        int created_at
+    }
+
+    JOB_BATCHES {
+        string id PK
+        string name
+        int total_jobs
+        int pending_jobs
+        int failed_jobs
+        longText failed_job_ids
+        mediumText options
+        int cancelled_at
+        int created_at
+        int finished_at
+    }
+
+    FAILED_JOBS {
+        int id PK
+        string uuid UK
+        text connection
+        text queue
+        longText payload
+        longText exception
+        timestamp failed_at
+    }
+
+    HEALTH_CHECK_RESULT_HISTORY_ITEMS {
+        int id PK
+        string check_name
+        string check_label
+        string status
+        text notification_message
+        string short_summary
+        json meta
+        timestamp ended_at
+        uuid batch
+        timestamp created_at
+        timestamp updated_at
     }
 ```
 
