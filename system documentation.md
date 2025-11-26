@@ -54,12 +54,11 @@ graph TB
 
 ## Use Case Diagrams
 
-### Overall System Use Cases
+### User Use Cases
 
 ```mermaid
 graph LR
     User((User))
-    Admin((Admin))
     AI[AI System]
     
     User --> UC1[Register/Login]
@@ -70,85 +69,28 @@ graph LR
     User --> UC6[Reply to Posts]
     User --> UC7[Chat with AI Assistant]
     User --> UC8[Receive Notifications]
-    
-    Admin --> UC9[Manage Users]
-    Admin --> UC10[Manage Forum Posts]
-    Admin --> UC11[Manage Comments]
-    Admin --> UC12[Manage Encyclopedia]
-    Admin --> UC13[View Dashboard]
     
     UC2 -.-> AI
     UC5 -.-> AI
     UC7 -.-> AI
     
     style User fill:#a8e6cf
-    style Admin fill:#ffd3b6
     style AI fill:#e1f5ff
 ```
 
-### User Use Case Diagram
+### Administrator Use Cases
 
 ```mermaid
-graph TB
-    User((User))
-    AI[AI System]
+graph LR
+    Admin((Admin))
     
-    User --> UC1[Register/Login]
-    User --> UC2[Scan Plant Disease]
-    User --> UC3[View Scan History]
-    User --> UC4[Browse Encyclopedia]
-    User --> UC5[Create Forum Post]
-    User --> UC6[Reply to Posts]
-    User --> UC7[Chat with AI Assistant]
-    User --> UC8[Receive Notifications]
-    User --> UC9[Update Profile]
-    User --> UC10[Search Diseases]
-    User --> UC11[Like Posts]
-    User --> UC12[Delete Own Posts]
+    Admin --> UC1[Manage Users]
+    Admin --> UC2[Manage Forum Posts]
+    Admin --> UC3[Manage Comments]
+    Admin --> UC4[Manage Encyclopedia]
+    Admin --> UC5[View Dashboard]
     
-    UC2 -.->|uses| AI
-    UC5 -.->|uses| AI
-    UC7 -.->|uses| AI
-    
-    style User fill:#a8e6cf,stroke:#333,stroke-width:3px
-    style AI fill:#e1f5ff,stroke:#333,stroke-width:2px
-    style UC2 fill:#ffe6e6
-    style UC5 fill:#ffe6e6
-    style UC7 fill:#ffe6e6
-```
-
-### Administrator Use Case Diagram
-
-```mermaid
-graph TB
-    Admin((Administrator))
-    
-    Admin --> UC1[Login to Admin Panel]
-    Admin --> UC2[View Dashboard Statistics]
-    Admin --> UC3[Manage Users]
-    Admin --> UC4[Manage Forum Posts]
-    Admin --> UC5[Manage Comments]
-    Admin --> UC6[Manage Encyclopedia]
-    Admin --> UC7[Add Disease Entry]
-    Admin --> UC8[Edit Disease Entry]
-    Admin --> UC9[Delete Disease Entry]
-    Admin --> UC10[Upload Disease Images]
-    Admin --> UC11[Deactivate Forum Posts]
-    Admin --> UC12[Delete Forum Posts]
-    Admin --> UC13[Monitor System Activity]
-    
-    UC6 --> UC7
-    UC6 --> UC8
-    UC6 --> UC9
-    UC6 --> UC10
-    
-    UC4 --> UC11
-    UC4 --> UC12
-    
-    style Admin fill:#ffd3b6,stroke:#333,stroke-width:3px
-    style UC2 fill:#fff4e1
-    style UC6 fill:#e6f3ff
-    style UC4 fill:#e6f3ff
+    style Admin fill:#ffd3b6
 ```
 
 ---
