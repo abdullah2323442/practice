@@ -109,6 +109,7 @@ graph LR
         P4[Encyclopedia]
         P5[AI Chatbot]
         P6[Admin Panel]
+        P7[Notification System]
     end
     
     DS1[(User Database)]
@@ -116,6 +117,7 @@ graph LR
     DS3[(Forum Database)]
     DS4[(Encyclopedia Database)]
     DS5[Image Storage]
+    DS6[(Notification Database)]
     
     AI[AI/ML Services]
     
@@ -129,12 +131,14 @@ graph LR
     P2 -->|Scan Results| DS2
     P2 -->|Store Image| DS5
     P2 -->|Diagnosis Report| User
+    P2 -.->|Trigger Alert| P7
     
     User -->|Post/Reply| P3
     P3 -->|AI Reply Request| AI
     AI -->|Generated Reply| P3
     P3 -->|Forum Data| DS3
     P3 -->|Forum Content| User
+    P3 -.->|Trigger Alert| P7
     
     User -->|Search Query| P4
     P4 -->|Disease Info| DS4
@@ -151,6 +155,9 @@ graph LR
     P6 -->|CRUD Operations| DS3
     P6 -->|CRUD Operations| DS4
     P6 -->|Statistics| Admin
+    
+    P7 -->|Store Alert| DS6
+    P7 -->|Push Notification| User
     
     style AI fill:#e1f5ff
     style User fill:#a8e6cf
