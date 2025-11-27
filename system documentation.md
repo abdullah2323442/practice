@@ -96,71 +96,101 @@ graph LR
 
 ## Data Flow Diagram (Level 0)
 
+### Context Diagram
+
 ```mermaid
-graph LR
-    User((User))
-    Admin((Admin))
+graph TB
+    User([User])
+    Admin([Administrator])
+    
+    System[PlantCare AI<br/>System]
+    
+    User -->|Plant Images<br/>Forum Posts<br/>Queries| System
+    System -->|Diagnosis Reports<br/>Information<br/>Notifications| User
+    
+    Admin -->|Management<br/>Commands| System
+    System -->|Statistics<br/>Reports| Admin
+    
+    AI[AI/ML<br/>Service]
+    System <-->|Inference<br/>Requests| AI
+    
+    style System fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    style User fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style Admin fill:#fff9c4,stroke:#f57c00,stroke-width:2px
+    style AI fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+```
+
+### Level 0 DFD - Main Processes
+
+```mermaid
+graph TB
+    User([User])
+    Admin([Admin])
     
     subgraph "PlantCare AI System"
-        P1[Authentication]
-        P2[Disease Detection]
-        P3[Forum Management]
-        P4[Encyclopedia]
-        P5[AI Chatbot]
-        P6[Admin Panel]
-        P7[Notification System]
+        P1[1.0<br/>User<br/>Authentication]
+        P2[2.0<br/>Disease<br/>Detection]
+        P3[3.0<br/>Community<br/>Forum]
+        P4[4.0<br/>Disease<br/>Encyclopedia]
+        P5[5.0<br/>AI<br/>Chatbot]
+        P6[6.0<br/>Admin<br/>Management]
     end
     
-    DS1[(User Database)]
-    DS2[(Scan Database)]
-    DS3[(Forum Database)]
-    DS4[(Encyclopedia Database)]
-    DS5[Image Storage]
-    DS6[(Notification Database)]
+    D1[(D1: Users)]
+    D2[(D2: Scans)]
+    D3[(D3: Forum)]
+    D4[(D4: Encyclopedia)]
+    D5[(D5: Notifications)]
+    FS[File Storage]
     
-    AI[AI/ML Services]
+    AI[AI/ML Model]
     
-    User -->|Login Credentials| P1
-    P1 -->|User Data| DS1
-    P1 -->|Authentication Token| User
+    User -->|Credentials| P1
+    P1 <-->|User Data| D1
+    P1 -->|Session| User
     
     User -->|Plant Image| P2
-    P2 -->|Image Analysis Request| AI
-    AI -->|Disease Prediction| P2
-    P2 -->|Scan Results| DS2
-    P2 -->|Store Image| DS5
-    P2 -->|Diagnosis Report| User
-    P2 -.->|Trigger Alert| P7
+    P2 -->|Image| AI
+    AI -->|Prediction| P2
+    P2 <-->|Scan Data| D2
+    P2 <-->|Image Files| FS
+    P2 -->|Report| User
+    P2 -.->|Notify| D5
     
-    User -->|Post/Reply| P3
-    P3 -->|AI Reply Request| AI
-    AI -->|Generated Reply| P3
-    P3 -->|Forum Data| DS3
-    P3 -->|Forum Content| User
-    P3 -.->|Trigger Alert| P7
+    User -->|Posts/Replies| P3
+    P3 -->|Context| AI
+    AI -->|AI Reply| P3
+    P3 <-->|Forum Data| D3
+    P3 <-->|Images| FS
+    P3 -->|Content| User
+    P3 -.->|Notify| D5
     
-    User -->|Search Query| P4
-    P4 -->|Disease Info| DS4
-    P4 -->|Disease Details| User
+    User -->|Search| P4
+    P4 <-->|Disease Info| D4
+    P4 -->|Details| User
     
     User -->|Questions| P5
-    P5 -->|AI Request| AI
-    AI -->|AI Response| P5
+    P5 -->|Query| AI
+    AI -->|Response| P5
+    P5 <-->|Knowledge| D4
     P5 -->|Answers| User
     
-    Admin -->|Management Actions| P6
-    P6 -->|Read Statistics| DS1
-    P6 -->|CRUD Operations| DS2
-    P6 -->|CRUD Operations| DS3
-    P6 -->|CRUD Operations| DS4
-    P6 -->|Statistics| Admin
+    Admin -->|Actions| P6
+    P6 <-->|Manage| D1
+    P6 <-->|Manage| D2
+    P6 <-->|Manage| D3
+    P6 <-->|Manage| D4
+    P6 -->|Stats| Admin
     
-    P7 -->|Store Alert| DS6
-    P7 -->|Push Notification| User
+    D5 -.->|Alerts| User
     
-    style AI fill:#e1f5ff
-    style User fill:#a8e6cf
-    style Admin fill:#ffd3b6
+    style P1 fill:#e3f2fd,stroke:#1976d2
+    style P2 fill:#c8e6c9,stroke:#388e3c
+    style P3 fill:#fff9c4,stroke:#f57c00
+    style P4 fill:#f8bbd0,stroke:#c2185b
+    style P5 fill:#d1c4e9,stroke:#512da8
+    style P6 fill:#ffccbc,stroke:#d84315
+    style AI fill:#f3e5f5,stroke:#7b1fa2
 ```
 
 ---
@@ -385,345 +415,254 @@ erDiagram
 
 ## Sequence Diagrams
 
-### 1. User Registration and Login
+> **Note**: Simplified for IEEE academic reports. Each diagram shows core interactions only.
+
+### SD-1: User Authentication
 
 ```mermaid
 sequenceDiagram
-    actor User
-    participant Web as User Interface
-    participant Auth as Security System
+    participant U as User
+    participant S as System
     participant DB as Database
     
-    Note over User,DB: Registration Process
-    User->>Web: Enter registration details
-    Web->>Auth: Submit registration data
-    Auth->>Auth: Validate information
-    Auth->>Auth: Securely encrypt password
-    Auth->>DB: Create user account
-    DB-->>Auth: Confirmation
-    Auth-->>Web: Registration successful
-    Web-->>User: Show success message
+    Note over U,DB: Registration
+    U->>S: Register(name, email, password)
+    S->>S: Validate & Hash Password
+    S->>DB: Store User Data
+    DB-->>S: Success
+    S-->>U: Registration Complete
     
-    Note over User,DB: Login Process
-    User->>Web: Enter credentials
-    Web->>Auth: Submit login request
-    Auth->>DB: Retrieve user account
-    DB-->>Auth: User details
-    Auth->>Auth: Verify credentials
+    Note over U,DB: Login
+    U->>S: Login(email, password)
+    S->>DB: Retrieve User
+    DB-->>S: User Data
+    S->>S: Verify Credentials
     
-    alt Credentials Valid
-        Auth->>Auth: Generate Access Session
-        Auth->>DB: Log login activity
-        Auth-->>Web: Grant Access
-        Web-->>User: Redirect to Dashboard
+    alt Valid Credentials
+        S->>DB: Create Session
+        S-->>U: Access Granted
     else Invalid Credentials
-        Auth-->>Web: Access Denied
-        Web-->>User: Show error message
+        S-->>U: Access Denied
     end
 ```
 
-### 2. Plant Disease Detection
+### SD-2: Disease Detection Process
 
 ```mermaid
 sequenceDiagram
-    actor User
-    participant Web as User Interface
-    participant Scanner as Diagnostic System
+    participant U as User
+    participant S as System
     participant AI as AI Model
-    participant Encyc as Knowledge Base
     participant DB as Database
     
-    User->>Web: Upload plant image
-    Web->>Scanner: Submit image for analysis
+    U->>S: Upload Plant Image
+    S->>S: Validate & Store Image
+    S->>AI: Analyze Image
+    AI->>AI: Process & Classify
+    AI-->>S: Prediction Results
     
-    Scanner->>Scanner: Prepare image for AI
-    Scanner->>AI: Request disease diagnosis
-    AI->>AI: Analyze visual patterns
-    AI-->>Scanner: Prediction result & certainty
-    
-    alt High Certainty
-        Scanner->>Encyc: Retrieve disease information
-        Encyc-->>Scanner: Symptoms & Treatment details
-        Scanner->>Scanner: Compile final report
-        Scanner->>DB: Record scan history
-        DB-->>Scanner: Saved
-        Scanner-->>Web: Present diagnosis report
-        Web-->>User: View results & recommendations
-    else Low Certainty
-        Scanner-->>Web: Return "Unclear Result"
-        Web-->>User: Suggest retaking photo
+    alt Disease Detected
+        S->>DB: Fetch Treatment Info
+        DB-->>S: Disease Details
+        S->>DB: Save Scan Record
+        S-->>U: Diagnosis + Treatment
+    else Healthy Plant
+        S->>DB: Save Scan Record
+        S-->>U: Healthy Status
     end
-    
-    Note over User,DB: User can access this report later
 ```
 
-### 3. Creating Forum Post with AI Reply
+### SD-3: Forum Post Creation
 
 ```mermaid
 sequenceDiagram
-    actor User
-    participant Web as Web Interface
-    participant Forum as Forum System
+    participant U as User
+    participant S as System
     participant AI as AI Bot
     participant DB as Database
-    participant Notif as Notification System
     
-    User->>Web: Create new forum post
-    Web->>Forum: Submit post data
-    Forum->>DB: Save forum post
-    DB-->>Forum: Post ID
+    U->>S: Create Post(title, content, images)
+    S->>S: Validate Input
+    S->>DB: Store Post Data
+    DB-->>S: Post ID
     
-    Forum->>AI: Request AI reply
-    Note over AI: AI Bot analyzes post content
-    AI->>AI: Generate helpful response
-    AI-->>Forum: AI-generated reply
+    S->>AI: Generate Initial Reply
+    AI-->>S: AI Response
+    S->>DB: Store AI Reply
     
-    Forum->>DB: Save AI reply
-    DB-->>Forum: Confirmation
-    
-    Forum-->>Web: Post created successfully
-    Web-->>User: Show post with AI reply
-    
-    Note over User,Notif: Other users get notified
+    S-->>U: Post Created Successfully
 ```
 
-### 4. Community Interaction (Reply & Love)
+### SD-4: Community Interaction
 
 ```mermaid
 sequenceDiagram
-    actor UserA as User A
-    actor UserB as User B
-    participant Web as Web Interface
-    participant Forum as Forum System
+    participant U1 as User A
+    participant U2 as User B
+    participant S as System
     participant DB as Database
-    participant Notif as Notification System
     
-    Note over UserA,Notif: User B replies to User A's post
-    UserB->>Web: Write reply
-    Web->>Forum: Submit reply
-    Forum->>DB: Save reply
-    DB-->>Forum: Confirmation
+    Note over U1,DB: Reply Flow
+    U2->>S: Reply to Post
+    S->>DB: Store Reply
+    S->>DB: Create Notification
+    S-->>U1: Notify User A
+    S-->>U2: Reply Confirmed
     
-    Forum->>Notif: Create notification for User A
-    Notif->>DB: Save notification
-    Notif-->>UserA: Push notification
-    
-    Forum-->>Web: Reply posted
-    Web-->>UserB: Show success
-    
-    Note over UserA,Notif: User B loves the post
-    UserB->>Web: Click love button
-    Web->>Forum: Toggle love
-    Forum->>DB: Save/remove love
-    DB-->>Forum: Updated count
-    
-    Forum->>Notif: Create notification for User A
-    Notif-->>UserA: Push notification
-    
-    Forum-->>Web: Love count updated
-    Web-->>UserB: Update UI
+    Note over U1,DB: Like Flow
+    U2->>S: Like Post
+    S->>DB: Toggle Like
+    S->>DB: Update Count
+    S-->>U1: Notify User A
+    S-->>U2: UI Updated
 ```
 
-### 5. AI Chatbot Interaction
+### SD-5: AI Chatbot Interaction
 
 ```mermaid
 sequenceDiagram
-    actor User
-    participant Web as User Interface
-    participant Chatbot as Chatbot System
+    participant U as User
+    participant S as System
+    participant KB as Knowledge Base
     participant AI as AI Service
     
-    User->>Web: Ask question about plant care
-    Web->>Chatbot: Send user message
+    U->>S: Ask Question
+    S->>S: Analyze Intent
     
-    Chatbot->>Chatbot: Analyze question intent
-    
-    alt Question is plant disease related
-        Chatbot->>Chatbot: Search internal knowledge base
-        Chatbot-->>Web: Return predefined treatment/prevention info
-    else General plant care question
-        Chatbot->>AI: Request AI response
-        AI-->>Chatbot: AI-generated answer
-        Chatbot-->>Web: Return AI response
-    else Greeting or casual chat
-        Chatbot->>Chatbot: Use predefined responses
-        Chatbot-->>Web: Return response
-    end
-    
-    Web-->>User: Display response
-```
-```mermaid
-sequenceDiagram
-    actor User
-    participant Web as User Interface
-    participant System as System Backend
-    participant DB as Database
-    
-    User->>Web: Navigate to Scan History
-    Web->>System: Request past scans
-    System->>DB: Fetch user's scan records
-    DB-->>System: List of previous diagnoses
-    System-->>Web: Return history data
-    Web-->>User: Display history list
-    
-    User->>Web: Select specific scan
-    Web->>System: Request scan details
-    System->>DB: Fetch full report & image
-    DB-->>System: Detailed record
-    System-->>Web: Return details
-    Web-->>User: Show diagnosis & recommendations
-```
-
-### 8. Admin - Manage Forum Posts
-
-```mermaid
-sequenceDiagram
-    actor Admin
-    participant Web as Admin Panel
-    participant Forum as Forum Management
-    participant DB as Database
-    participant Notif as Notification System
-    
-    Admin->>Web: Access forum management
-    Web->>Forum: Request all posts
-    Forum->>DB: Fetch posts with filters
-    DB-->>Forum: Post list
-    Forum-->>Web: Display posts
-    Web-->>Admin: Show post table
-    
-    Note over Admin,Notif: Admin deactivates a post
-    Admin->>Web: Click deactivate
-    Web->>Forum: Deactivate post
-    Forum->>DB: Update post status to 'closed'
-    DB-->>Forum: Confirmation
-    Forum-->>Web: Success message
-    Web-->>Admin: Show updated status
-    
-    Note over Admin,Notif: Admin deletes a post
-    Admin->>Web: Click delete
-    Web->>Forum: Delete post request
-    Forum->>Notif: Delete related notifications
-    Notif->>DB: Remove notifications
-    Forum->>DB: Mark post as deleted
-    DB-->>Forum: Confirmation
-    Forum-->>Web: Success message
-    Web-->>Admin: Post removed from list
-```
-
-### 9. Admin - Manage Encyclopedia
-
-```mermaid
-sequenceDiagram
-    actor Admin
-    participant Web as Admin Panel
-    participant Encyclopedia as Encyclopedia Management
-    participant DB as Database
-    participant Storage as File Storage
-    
-    Note over Admin,Storage: Adding new disease entry
-    Admin->>Web: Click "Add New Entry"
-    Web-->>Admin: Show entry form
-    
-    Admin->>Web: Fill disease details + upload image
-    Web->>Encyclopedia: Submit new entry
-    Encyclopedia->>Storage: Save disease image
-    Storage-->>Encyclopedia: Image path
-    
-    Encyclopedia->>DB: Save disease entry
-    DB-->>Encyclopedia: Confirmation
-    Encyclopedia-->>Web: Success message
-    Web-->>Admin: Show updated list
-    
-    Note over Admin,Storage: Editing existing entry
-    Admin->>Web: Click edit on entry
-    Web->>Encyclopedia: Request entry data
-    Encyclopedia->>DB: Fetch entry
-    DB-->>Encyclopedia: Entry data
-    Encyclopedia-->>Web: Populate form
-    Web-->>Admin: Show edit form
-    
-    Admin->>Web: Update details
-    Web->>Encyclopedia: Submit changes
-    Encyclopedia->>DB: Update entry
-    DB-->>Encyclopedia: Confirmation
-    Encyclopedia-->>Web: Success message
-    Web-->>Admin: Show updated entry
-```
-
-### 9. Notification System
-
-```mermaid
-sequenceDiagram
-    actor User
-    participant Web as Web Interface
-    participant Notif as Notification System
-    participant DB as Database
-    participant Forum as Forum System
-    
-    Note over User,Forum: User logs in
-    User->>Web: Login to system
-    Web->>Notif: Fetch notifications
-    Notif->>DB: Get user notifications
-    DB-->>Notif: Notification list
-    
-    Notif->>Notif: Filter deleted post notifications
-    Notif->>DB: Delete invalid notifications
-    
-    Notif-->>Web: Valid notifications + count
-    Web-->>User: Show notification badge
-    
-    Note over User,Forum: User clicks notification
-    User->>Web: Click notification
-    Web->>Notif: Mark as read
-    Notif->>DB: Update read status
-    DB-->>Notif: Confirmation
-    
-    Web->>Forum: Navigate to linked post
-    
-    alt Post exists and active
-        Forum->>DB: Fetch post
-        DB-->>Forum: Post data
-        Forum-->>Web: Display post
-        Web-->>User: Show post page
-    else Post deleted or inactive
-        Forum-->>Web: Post not available
-        Web-->>User: Redirect with error message
+    alt Disease Query
+        S->>KB: Search Database
+        KB-->>S: Disease Info
+        S-->>U: Treatment Advice
+    else General Query
+        S->>AI: Request Response
+        AI-->>S: Generated Answer
+        S-->>U: AI Response
+    else Greeting
+        S->>S: Use Template
+        S-->>U: Predefined Response
     end
 ```
 
-### 10. User Profile Management
+### SD-6: View Scan History
 
 ```mermaid
 sequenceDiagram
-    actor User
-    participant Web as Web Interface
-    participant Profile as Profile System
-    participant Auth as Authentication
+    participant U as User
+    participant S as System
     participant DB as Database
     
-    User->>Web: Access profile page
-    Web->>Profile: Request user data
-    Profile->>DB: Fetch user information
-    DB-->>Profile: User data
-    Profile-->>Web: Display profile
-    Web-->>User: Show profile form
+    U->>S: Request Scan History
+    S->>DB: Fetch User Scans
+    DB-->>S: Scan List
+    S-->>U: Display History
     
-    User->>Web: Update profile information
-    Web->>Profile: Submit changes
-    Profile->>Profile: Validate data
+    U->>S: Select Scan
+    S->>DB: Fetch Scan Details
+    DB-->>S: Full Report
+    S-->>U: Show Diagnosis
+```
+
+### SD-7: Admin Forum Management
+
+```mermaid
+sequenceDiagram
+    participant A as Admin
+    participant S as System
+    participant DB as Database
     
-    alt Password is being changed
-        Profile->>Auth: Verify old password
-        Auth->>DB: Check credentials
-        DB-->>Auth: Verification result
-        Auth-->>Profile: Password verified
-        Profile->>Profile: Hash new password
+    A->>S: Access Forum Management
+    S->>DB: Fetch All Posts
+    DB-->>S: Post List
+    S-->>A: Display Posts
+    
+    alt Deactivate Post
+        A->>S: Deactivate Post
+        S->>DB: Update Status = 'closed'
+        S-->>A: Success
+    else Delete Post
+        A->>S: Delete Post
+        S->>DB: Soft Delete Post
+        S->>DB: Remove Notifications
+        S-->>A: Post Deleted
+    end
+```
+
+### SD-8: Admin Encyclopedia Management
+
+```mermaid
+sequenceDiagram
+    participant A as Admin
+    participant S as System
+    participant DB as Database
+    participant FS as File Storage
+    
+    Note over A,FS: Add Entry
+    A->>S: Create Entry(data, image)
+    S->>FS: Store Image
+    FS-->>S: Image Path
+    S->>DB: Save Entry
+    S-->>A: Entry Created
+    
+    Note over A,FS: Edit Entry
+    A->>S: Request Entry
+    S->>DB: Fetch Entry
+    DB-->>S: Entry Data
+    S-->>A: Display Form
+    A->>S: Update Entry
+    S->>DB: Update Data
+    S-->>A: Entry Updated
+```
+
+### SD-9: Notification System
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant S as System
+    participant DB as Database
+    
+    U->>S: Login
+    S->>DB: Fetch Notifications
+    DB-->>S: Notification List
+    S->>S: Filter Invalid
+    S-->>U: Show Badge(count)
+    
+    U->>S: Click Notification
+    S->>DB: Mark as Read
+    
+    alt Post Exists
+        S->>DB: Fetch Post
+        DB-->>S: Post Data
+        S-->>U: Display Post
+    else Post Deleted
+        S-->>U: Error Message
+    end
+```
+
+### SD-10: User Profile Update
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant S as System
+    participant DB as Database
+    
+    U->>S: Access Profile
+    S->>DB: Fetch User Data
+    DB-->>S: User Info
+    S-->>U: Display Profile
+    
+    U->>S: Update Profile
+    S->>S: Validate Data
+    
+    opt Password Change
+        S->>DB: Verify Old Password
+        S->>S: Hash New Password
     end
     
-    Profile->>DB: Update user data
-    DB-->>Profile: Confirmation
-    Profile-->>Web: Success message
-    Web-->>User: Show updated profile
+    S->>DB: Update User
+    DB-->>S: Success
+    S-->>U: Profile Updated
 ```
 
 ---
@@ -767,3 +706,94 @@ sequenceDiagram
 ---
 
 *This documentation provides a comprehensive overview of the PlantCare AI system architecture and functionality, designed for academic and technical review purposes.*
+
+---
+
+## IEEE Academic Report Guidelines
+
+### Recommended Diagrams for A4 Reports
+
+**Essential Diagrams (Must Include):**
+1. **Context Diagram** - Shows system boundaries and external entities
+2. **DFD Level 0** - Main system processes
+3. **Use Case Diagram** - Functional requirements
+4. **ERD (Simplified)** - Database design
+5. **2-3 Key Sequence Diagrams**:
+   - SD-2: Disease Detection (core feature)
+   - SD-3: Forum Post Creation (community feature)
+   - SD-7: Admin Management (admin feature)
+
+**Optional (Based on Space):**
+- System Architecture Diagram
+- Additional Sequence Diagrams
+- Component Diagram
+
+### Diagram Formatting Tips
+
+**Figure Captions:**
+- Place captions below diagrams
+- Format: *Figure X: [Diagram Type] - [Description]*
+- Example: *Figure 1: Data Flow Diagram - Level 0 Context*
+
+**Sizing for IEEE Papers:**
+- Single column width: 3.5 inches (88.9mm)
+- Double column width: 7 inches (177.8mm)
+- Ensure text remains readable at target size
+
+**Resolution:**
+- Export at minimum 300 DPI for print quality
+- Use vector formats (SVG, PDF) when possible
+- PNG acceptable for raster images
+
+**References in Text:**
+- Cite diagrams in your report text
+- Example: "The system architecture (Fig. 2) demonstrates..."
+- Example: "As shown in the sequence diagram (Fig. 5)..."
+
+**Consistency:**
+- Use same notation style throughout
+- Maintain consistent color scheme
+- Keep participant names uniform across diagrams
+
+### Diagram Selection Guide
+
+**For System Overview:**
+- Use Context Diagram + DFD Level 0
+
+**For Functional Requirements:**
+- Use Use Case Diagrams
+
+**For Process Flows:**
+- Select 3-5 most critical Sequence Diagrams
+- Focus on: Authentication, Core Features, Admin Functions
+
+**For Data Design:**
+- Use ERD (Simplified version)
+
+**For Architecture:**
+- Use System Architecture Diagram
+
+### Export Instructions
+
+1. **From Mermaid Live Editor:**
+   - Copy diagram code
+   - Paste into [Mermaid Live Editor](https://mermaid.live)
+   - Export as SVG or PNG
+   - Set appropriate resolution
+
+2. **Sizing:**
+   - Resize to fit A4 page width
+   - Ensure readability after scaling
+   - Test print before final submission
+
+3. **Quality Check:**
+   - Verify all text is legible
+   - Check arrow directions are clear
+   - Ensure colors are distinguishable in grayscale
+
+---
+
+**Document Version:** 2.0  
+**Last Updated:** November 2025  
+**Format:** IEEE Academic Standard  
+**Page Size:** A4 (210mm × 297mm)
